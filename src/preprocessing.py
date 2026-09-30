@@ -15,7 +15,7 @@ VI_STOPWORDS = {
 URL_REGEX = re.compile(r'https?://\S+|www\.\S+')
 EXTRA_WS = re.compile(r'\s+')
 
-def clean_text(text, remove_digits, remove_punct):
+def clean_text(text, remove_digits=True, remove_punct=True):
     if not isinstance(text, str):
         text = str(text)
     text = text.lower()
@@ -35,7 +35,7 @@ def tokenize_vi(text):
     if HAS_UNDERTHESEA:
         toks = word_tokenize(text, format="text")  
         return toks.split()
-    text = re.sub(r'([,.;:?!()"])', r' \1 ', text)
+    text = re.sub(r'([,.;:?!()\"])', r' \1 ', text)
     return [t for t in text.split() if t]
 
 def remove_stopwords(tokens, stopwords=None):
@@ -43,7 +43,7 @@ def remove_stopwords(tokens, stopwords=None):
         stopwords = VI_STOPWORDS
     return [t for t in tokens if t not in stopwords and len(t) > 0]
 
-def preprocess(text, remove_digits, remove_punct, stopwords=None) -> str:
+def preprocess(text, remove_digits=True, remove_punct=True, stopwords=None) -> str:
     c = clean_text(text, remove_digits=remove_digits, remove_punct=remove_punct)
     toks = tokenize_vi(c)
     toks = remove_stopwords(toks, stopwords=stopwords)
@@ -54,3 +54,21 @@ def split_sentences(text):
         return sent_tokenize(text)
     s = re.split(r'(?<=[.!?])\s+', text.strip())
     return [seg.strip() for seg in s if seg.strip()]
+
+def identity_preprocessor(text):
+    """Hàm tiền xử lý đồng nhất giữ nguyên chuỗi đã xử lý."""
+    return text
+
+def space_tokenizer(text):
+    """Tách token theo khoảng trắng cho chuỗi đã tiền xử lý/tách từ."""
+    if isinstance(text, str):
+        return text.split()
+    return list(text)
+
+def load_documents(filepath: str) -> list:
+    """Đọc dữ liệu văn bản từ file CSV (hoặc text). Trả về danh sách dict."""
+    import pandas as pd
+    df = pd.read_csv(filepath)
+    if "doc_id" not in df.columns:
+        df["doc_id"] = list(range(1, len(df) + 1))
+    return df.to_dict(orient="records")
