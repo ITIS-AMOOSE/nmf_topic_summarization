@@ -214,6 +214,20 @@ class TestSummarizer(unittest.TestCase):
         expected_cols = {"index", "sentence", "dominant_topic", "score", "selected"}
         self.assertTrue(expected_cols.issubset(df.columns))
 
+    def test_evaluation_contract_compatibility(self):
+        """Kiểm tra tính tương thích các trường đầu ra cho Người 4 (evaluation.py & main.py)."""
+        text = "Trí tuệ nhân tạo phát triển. Doanh nghiệp ứng dụng công nghệ."
+        result = summarize(text, self.vectorizer, self.nmf_model, num_sentences=1)
+        expected_contract_keys = ["original", "summary", "topic_id", "keywords", "sentence_scores", "selected_indices"]
+        for key in expected_contract_keys:
+            self.assertIn(key, result, f"Thiếu trường '{key}' theo quy ước chung của Người 4")
+        self.assertEqual(result["original"], text)
+        self.assertEqual(result["topic_id"], result["detected_topic"])
+        self.assertEqual(result["keywords"], result["topic_keywords"])
+        self.assertEqual(len(result["sentence_scores"]), len(result["sentences"]))
+        self.assertEqual(result["sentence_scores"][0], result["sentence_details"][0]["score"])
+
 
 if __name__ == "__main__":
     unittest.main()
+

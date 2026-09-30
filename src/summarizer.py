@@ -516,7 +516,12 @@ def summarize(
             "summary": summary_text,
             "scoring_method": scoring_method,
             "similarity_threshold": similarity_threshold,
-            "warning": "Document contains no known TF-IDF vocabulary."
+            "warning": "Document contains no known TF-IDF vocabulary.",
+            # Tương thích với quy ước chung của Người 4 (evaluation.py & main.py)
+            "original": text,
+            "topic_id": 0,
+            "keywords": [],
+            "sentence_scores": [0.0] * num_total_sentences,
         }
 
     # 6. NMF transform cho document và sentences (KHÔNG TRAIN LẠI)
@@ -591,6 +596,7 @@ def summarize(
 
     summary_sentences = [original_sentences[i] for i in selected_indices]
     summary_text = " ".join(summary_sentences)
+    sentence_scores_list = [round(float(s), 6) for s in scores]
 
     return {
         "original_text": text,
@@ -604,7 +610,12 @@ def summarize(
         "summary_sentences": summary_sentences,
         "summary": summary_text,
         "scoring_method": scoring_method,
-        "similarity_threshold": similarity_threshold
+        "similarity_threshold": similarity_threshold,
+        # Tương thích với quy ước chung của Người 4 (evaluation.py & main.py)
+        "original": text,
+        "topic_id": dominant_topic,
+        "keywords": topic_keywords,
+        "sentence_scores": sentence_scores_list,
     }
 
 
